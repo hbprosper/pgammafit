@@ -1,0 +1,29 @@
+\form#0:$i = 1 \ldots M$
+\form#1:$D_i$
+\form#2:$t\bar{t}$
+\form#3:$W + jets$
+\form#4:$QCD$
+\form#5:$j = 1 \ldots N$
+\form#6:$A_{ji}$
+\form#7:$N$
+\form#8:$D$
+\form#9:$A_j = A_{j1}, \ldots, A_{jM}$
+\form#10:$j$
+\form#11:\[ p(D|p, a) = \prod_{i=1}^M\prod_{j=1}^N \mbox{Poisson}(D_i|d_i), \]
+\form#12:$ d_i = \sum_{j=1}^N \, p_j \, a_{ji}, \, \, \, i=1 \ldots M.$
+\form#13:$p_j$
+\form#14:$a_{ji}$
+\form#15:$ \pi(p, a) = \pi(a|p) \, \pi(p) $
+\form#16:$\pi(a|p)$
+\form#17:\[ p(a|p) = \prod_{i=1}^M\prod_{j=1}^N \mbox{gamma}(a_{ji}|A_{ji}+1, 1), \]
+\form#18:\[ \mbox{gamma}(x|\alpha,\beta) = \beta^{\alpha} x^{\alpha-1} e^{-\beta x} / \Gamma(\alpha). \]
+\form#19:\[ p(p|D) = p(D|p) \, \pi(p) \, / \, \int p(D|p) \, \pi(p) \, dp, \]
+\form#20:$p(D|p)$
+\form#21:$p(D|p, a)$
+\form#22:$A_{ji}-1/2$
+\form#23:$\delta A_{ji}$
+\form#24:$\sqrt{a_{ji}}$
+\form#25:$f_{ji} = (A_{ji} / \delta A_{ji} )^2$
+\form#26:$A_{ji, eff} = f_{ji} A_{ji}$
+\form#27:$\delta A_{ji} / A_{ji}$
+\form#28:$f_{ji} \rightarrow \infty$

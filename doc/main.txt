@@ -1,0 +1,31 @@
+/**	\mainpage
+
+	\section	intro	Introduction
+
+<b>pgammafit</b> uses the Poisson-gamma model to perform a multi-bin, multi-source Bayesian
+fit, based on the paper
+<p>
+``Bayesian analysis of multisource data,''
+Pushpalatha C. Bhat, Harrison B. Prosper, Scott S. Snyder,
+Phys.Lett. B407 (1997) 73-78,
+DOI: 10.1016/S0370-2693(97)00723-5, FERMILAB-PUB-96-397
+<p>
+which may be found at
+<p>
+\url https://inspirehep.net/record/441459
+
+	v1.1.1
+	December, 2005, updated June 2016
+	Harrison B. Prosper
+<p>
+Department of Physics, Florida State University<br>
+
+email: harry@hep.fsu.edu, Harry.Prosper@cern.ch
+*/
+
+
+
+
+
+
+
