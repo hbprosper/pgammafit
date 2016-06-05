@@ -12,7 +12,7 @@ var class_poisson_gamma_fit =
     [ "PoissonGammaFit", "class_poisson_gamma_fit.html#a300875a7debd274503663bfeb3f383ce", null ],
     [ "PoissonGammaFit", "class_poisson_gamma_fit.html#a3975ee81dfba9057c180e77835777479", null ],
     [ "~PoissonGammaFit", "class_poisson_gamma_fit.html#ac3c874d659204ad430da4e8a87b2bd95", null ],
-    [ "add", "class_poisson_gamma_fit.html#a457fc2de0b560af6862136617280f426", null ],
+    [ "add", "class_poisson_gamma_fit.html#a42527ea30e63dc6ddc3ed477d5944519", null ],
     [ "errorMatrix", "class_poisson_gamma_fit.html#acd2d1021d147ab1ae6c5cee219da8df4", null ],
     [ "execute", "class_poisson_gamma_fit.html#a0457f3e4a96fd8e81016940786462e18", null ],
     [ "fixed", "class_poisson_gamma_fit.html#aef2c1d8f97a17031320ecc4781406bf6", null ],

@@ -103,9 +103,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae3a452c3bb37d5c9af47c5b2db2d8b2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_poisson_gamma_fit.html#ae3a452c3bb37d5c9af47c5b2db2d8b2a">good</a> ()</td></tr>
 <tr class="memdesc:ae3a452c3bb37d5c9af47c5b2db2d8b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if all is well.  <a href="#ae3a452c3bb37d5c9af47c5b2db2d8b2a">More...</a><br /></td></tr>
 <tr class="separator:ae3a452c3bb37d5c9af47c5b2db2d8b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a457fc2de0b560af6862136617280f426"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_poisson_gamma_fit.html#a457fc2de0b560af6862136617280f426">add</a> (<a class="el" href="_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91">vdouble</a> &amp;A, <a class="el" href="_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91">vdouble</a> &amp;dA, bool <a class="el" href="class_poisson_gamma_fit.html#aef2c1d8f97a17031320ecc4781406bf6">fixed</a>=false)</td></tr>
-<tr class="memdesc:a457fc2de0b560af6862136617280f426"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a source with a floating yield by default.  <a href="#a457fc2de0b560af6862136617280f426">More...</a><br /></td></tr>
-<tr class="separator:a457fc2de0b560af6862136617280f426"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42527ea30e63dc6ddc3ed477d5944519"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_poisson_gamma_fit.html#a42527ea30e63dc6ddc3ed477d5944519">add</a> (<a class="el" href="_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91">vdouble</a> &amp;A, <a class="el" href="_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91">vdouble</a> &amp;dA, bool scale=true, bool <a class="el" href="class_poisson_gamma_fit.html#aef2c1d8f97a17031320ecc4781406bf6">fixed</a>=false)</td></tr>
+<tr class="separator:a42527ea30e63dc6ddc3ed477d5944519"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0457f3e4a96fd8e81016940786462e18"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_poisson_gamma_fit.html#a0457f3e4a96fd8e81016940786462e18">execute</a> (std::vector&lt; double &gt; &amp;<a class="el" href="class_poisson_gamma_fit.html#a9a17c82c3c583ce64becbffa61d97be9">guess</a>)</td></tr>
 <tr class="memdesc:a0457f3e4a96fd8e81016940786462e18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the fit.  <a href="#a0457f3e4a96fd8e81016940786462e18">More...</a><br /></td></tr>
 <tr class="separator:a0457f3e4a96fd8e81016940786462e18"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -270,7 +269,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a457fc2de0b560af6862136617280f426"></a>
+<a class="anchor" id="a42527ea30e63dc6ddc3ed477d5944519"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -290,6 +289,12 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>scale</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>fixed</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
@@ -299,8 +304,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Add a source with a floating yield by default. </p>
+<p>Add a source with a floating yield by default. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>- source counts </td></tr>
+    <tr><td class="paramname">dA</td><td>- source uncertainties </td></tr>
+    <tr><td class="paramname">scale</td><td>- if true, scale p for this source so that p is a count. </td></tr>
+    <tr><td class="paramname">fixed</td><td>- if true, keep this parameter fixed. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

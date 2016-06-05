@@ -80,11 +80,49 @@ namespace
 //-----------------------------------------------------------------------------
 // Class to perform Bayesian fit
 //-----------------------------------------------------------------------------
-PoissonGammaFit::PoissonGammaFit() {}
+PoissonGammaFit::PoissonGammaFit()
+  : _D(vdouble()),
+    _A(vvdouble()),
+    _f(vvdouble()),
+    _a(vvdouble()),
+    _scale(vbool()),
+    _fixed(vbool()),
+    _guess(vdouble()),
+    _ns(vdouble()),
+    _mode(vdouble()),
+    _mean(vdouble()),
+    _width(vdouble()),
+    _cov(vvdouble()),
+    _verbosity(0),
+    _status(kSUCCESS),
+    _N(0),
+    _M(0),
+    _nd(0),
+    _loglikemax(0),
+    _logevidence(0)
+{}
 
 PoissonGammaFit::PoissonGammaFit(vdouble& D,  // Counts  "D_i" for data.
                                  int verbosity)
-  : _D(D), _verbosity(verbosity)
+  : _D(D),
+    _A(vvdouble()),
+    _f(vvdouble()),
+    _a(vvdouble()),
+    _scale(vbool()),
+    _fixed(vbool()),
+    _guess(vdouble()),
+    _ns(vdouble()),
+    _mode(vdouble()),
+    _mean(vdouble()),
+    _width(vdouble()),
+    _cov(vvdouble()),
+    _verbosity(verbosity),
+    _status(kSUCCESS),
+    _N(0),
+    _M(0),
+    _nd(0),
+    _loglikemax(0),
+    _logevidence(0)
 {
   if ( _verbosity > 0 )
     cout << "PoissonGammaFit - Started" << endl;
@@ -109,16 +147,23 @@ PoissonGammaFit::PoissonGammaFit(vdouble& D,  // Counts  "D_i" for data.
 }
 
 void 
-PoissonGammaFit::add(vector<double>& A, vector<double>& dA, bool isfixed)
+PoissonGammaFit::add(vector<double>& A, vector<double>& dA,
+		     bool scale,
+		     bool isfixed)
 {
   // Compute scale factors
-  vector<double> f(A.size(), 1); // default scale factor
+  vector<double> f(A.size(), 1); // default scale factor = 1
   if ( dA.size() == A.size() )
     {
       for(unsigned int i=0; i < A.size(); ++i)
         {
           if ( dA[i] > 0 )
             {
+	      // assume:
+	      // f *  A = Aeff
+	      // f * dA = sqrt(Aeff)
+	      // so f = A / (dA*dA)
+	      // where Aeff is the effective count
               f[i] = A[i] / (dA[i]*dA[i]);
             }
         }
@@ -126,6 +171,7 @@ PoissonGammaFit::add(vector<double>& A, vector<double>& dA, bool isfixed)
 
   _A.push_back(A);
   _a.push_back(A);
+  _scale.push_back(scale);
   _fixed.push_back(isfixed);
   _f.push_back(f);
 }
@@ -193,7 +239,7 @@ double
 PoissonGammaFit::logLikelihood(vdouble& p)
 {
   for(int i=0; i < _N; i++) if (p[i] < 0) return 0;
-  return pg::poissongamma(_D, p, _A, _f, true);
+  return pg::poissongamma(_D, p, _A, _f, _scale);
 }
 
 double 
@@ -201,7 +247,7 @@ PoissonGammaFit::logLikelihood(double* point)
 {
   vdouble p(_N);
   copy(point, point+_N, p.begin());
-  return pg::poissongamma(_D, p, _A, _f, true);
+  return pg::poissongamma(_D, p, _A, _f, _scale);
 }
 
 bool 
@@ -397,8 +443,7 @@ namespace pg {
                  vdouble&	p,   // Weights "p_j" 
                  vvdouble&	A,   // Counts  "A_ji" for up to 8 sources
                  vvdouble&	f,   // scale factor for  "A_ji"
-                 bool returnlog, // return log(P) if true
-                 bool scale)     // Scale p_j if true  
+                 vector<bool>& scale)     // Scale p_j if true  
   {
     int N = p.size(); // Number of sources (N)
     int M = D.size(); // Number of bins    (M)
@@ -438,12 +483,7 @@ namespace pg {
     // loop over the M terms of the product,
     // corresponding to the M bins
 
-    double prob;
-    if ( returnlog )
-      prob = 0.0;
-    else
-      prob = 1.0;
-
+    double prob=0;
     for (int i = 0; i < M; ++i)
       {
         int Di = (int)D[i]; // data count for bin i
@@ -453,9 +493,9 @@ namespace pg {
         // first do zero...      
         for (int j = 0; j < N; ++j)
           {
-            // Normalize sources to unit area so that
+            // Optionally, normalize this source to unit area so that
             // x[i] becomes the actual source count.
-            if ( scale )
+            if ( scale[j] )
               x[j] = p[j] / (ns[j]+M);
             else
               x[j] = p[j];
@@ -580,10 +620,7 @@ namespace pg {
                             c[7][Di-j-k-l-m-n-jj-kk];
             break;
           };
-        if ( returnlog )
-          prob += log(sum);
-        else
-          prob *= sum;
+	prob += log(sum);
       }
     return prob;
   }

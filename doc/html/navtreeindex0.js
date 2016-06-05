@@ -1,9 +1,10 @@
 var NAVTREEINDEX0 =
 {
 "_poisson_gamma_fit_8h.html":[3,0,0,0],
-"_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91":[3,0,0,0,1],
-"_poisson_gamma_fit_8h.html#a9a2e4a98740e27be1530c34a1285a940":[3,0,0,0,2],
-"_poisson_gamma_fit_8h.html#ae402d7ed45f2a578aa7160710ee722f7":[3,0,0,0,3],
+"_poisson_gamma_fit_8h.html#a3dd9ecf275bb20ae78d7361b4867bd91":[3,0,0,0,2],
+"_poisson_gamma_fit_8h.html#a4718076517c8774a8a5eb8c6840c8922":[3,0,0,0,4],
+"_poisson_gamma_fit_8h.html#a77d394d8b4a92416d4b16a4f51ae13a6":[3,0,0,0,1],
+"_poisson_gamma_fit_8h.html#a9a2e4a98740e27be1530c34a1285a940":[3,0,0,0,3],
 "_poisson_gamma_fit_8h_source.html":[3,0,0,0],
 "annotated.html":[2,0],
 "class_poisson_gamma_fit.html":[2,0,0],
@@ -19,7 +20,7 @@ var NAVTREEINDEX0 =
 "class_poisson_gamma_fit.html#a32bf56e801839415e1d25c5b05e86b5ca792f2bef6734d1c5ae964cf6ef358bba":[2,0,0,0,1],
 "class_poisson_gamma_fit.html#a334d293eb21a4e5d09e390a7b754da4b":[2,0,0,12],
 "class_poisson_gamma_fit.html#a3975ee81dfba9057c180e77835777479":[2,0,0,2],
-"class_poisson_gamma_fit.html#a457fc2de0b560af6862136617280f426":[2,0,0,4],
+"class_poisson_gamma_fit.html#a42527ea30e63dc6ddc3ed477d5944519":[2,0,0,4],
 "class_poisson_gamma_fit.html#a477fb47ca4289c261bd464cc494c21bc":[2,0,0,16],
 "class_poisson_gamma_fit.html#a53fa06de9002d1eb39be68e7ad5af1d5":[2,0,0,11],
 "class_poisson_gamma_fit.html#a78a13ffbd0f3f4ff723631b59b8e5596":[2,0,0,17],

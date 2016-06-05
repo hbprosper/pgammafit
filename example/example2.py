@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 #------------------------------------------------------------------------------
-#- File: pgammafit.py
-#- Description: Example of use of PoissonGammaFit
-#               Fit a mixture of QCD (QCD+Z), W+jets, top (tt, tqb, tb, tW)
-#               to data. The counts for the sources are specified as
-#               2-d histograms as are the data. The example is the expectation,
-#               after cuts, for an integrated luminosity of 10/pb. The MC
-#               samples were provided by Lukas V.
-#- Created: 20-Sep-2010 Harrison B. Prosper
-#           11-Feb-2011 HBP - remove dependence of kit.h
-#  Updated: 03-Jun-2016 HBP - migrate to github for Sam
+#  File: example2.py
+#  Description: Same as pgammafit.py, except that the QCD strength is left
+#               un-scaled so that it is merely the scale factor between
+#               the QCD in the signal region and QCD in the control region.
+#  Created: 20-Sep-2010 Harrison B. Prosper
+#  Updated: 04-Jun-2016 HBP - generalization for Sam
 #------------------------------------------------------------------------------
 import os, sys, re
 from time import sleep
@@ -263,9 +259,10 @@ def main():
     pgfit = PoissonGammaFit(D)
 
     # Add sources
-    # scale the p_js so that the answers are counts
-    scale = True
-    for a, da in A: pgfit.add(a, da, scale) # add a source
+    scale = False # do not scale QCD 
+    for a, da in A:
+        pgfit.add(a, da, scale) # add a source
+        scale = True
 
     # Find mode of posterior density
     # make some reasonable guesses for fit
@@ -274,7 +271,7 @@ def main():
     pgfit.execute(guess)
 
     if not pgfit.good():
-        sys.exit('''
+      sys.exit('''
         ** :( boo hoo - fit failed!
         ** quit or try better starting guesses for
         ** the source counts in the signal region and/or do some
@@ -295,7 +292,7 @@ def main():
     print "%-10s %10s\t%10s    %10s" %  \
           ('source', "true count", " estimated count", "")
     for index, s in enumerate(sources):
-        print "%-10s %10.f\t%10.0f +/-%-10.0f" % \
+        print "%-10s %10.0f\t%10.3f +/-%-10.3f" % \
               (s, count[s], mode[index], error[index])
 #------------------------------------------------------------------------------
 try:

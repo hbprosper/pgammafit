@@ -15,24 +15,28 @@
 //              p is a vector of N parameters (that is, over N sources)
 //              A is a vector of vectors of size N x M counts.
 //              f is a vector of vectors of size N x M scale factors.
+//              such that f*A = Aeff, f*dA = sqrt(Aeff), where Aeff
+//              is an effective Poisson count.
 //
 // Created: 27-Jun-2005 Harrison B. Prosper
 //          19-Feb-2011 HBP add add(..)
 //          16-Apr-2011 HBP allow for parameter fixing
+//          05-Jun-2016 HBP allow different scaling assuptions for different
+//                      sources.
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
 
+typedef std::vector<bool> vbool;
 typedef std::vector<double>  vdouble;
 typedef std::vector<std::vector<double> > vvdouble;
 
 namespace pg {
   double 
-  poissongamma(vdouble&	D,   // Counts  "D_i" for data.
-	       vdouble&	p,   // Weights "p_j" 
-	       vvdouble&	A,   // Counts  "A_ji" for up to 8 sources
-	       vvdouble&	f,   // scale factor for  "A_ji"
-	       bool returnlog,       // return log(P) if true
-	       bool scale=true);     // Scale p_j if true  
+  poissongamma(vdouble&	      D,   // Counts  "D_i" for data.
+	       vdouble&	      p,   // Weights "p_j" 
+	       vvdouble&      A,   // Counts  "A_ji" for up to 8 sources
+	       vvdouble&      f,   // scale factor for  "A_ji"
+	       vbool& scale);      // Scale p_j if true
 }
 
 /** Fit Poisson/gamma model to data.
@@ -153,8 +157,13 @@ class PoissonGammaFit
   /// True if all is well.
   bool       good();
 
-  /// Add a source with a floating yield by default.
-  void       add(vdouble& A, vdouble& dA, bool fixed=false);
+  /** Add a source with a floating yield by default.
+      @param A  - source counts
+      @param dA - source uncertainties
+      @param scale - if true, scale p for this source so that p is a count.
+      @param fixed - if true, keep this parameter fixed.
+   */
+  void       add(vdouble& A, vdouble& dA, bool scale=true, bool fixed=false);
 
   /// Execute the fit.
   bool       execute(std::vector<double>& guess);
@@ -197,26 +206,23 @@ class PoissonGammaFit
   vdouble  _D;
   vvdouble _A;
   vvdouble _f;
-  int      _verbosity;
-
   vvdouble _a;
-  std::vector<bool> _fixed;
-  vdouble           _guess;
-  
-  int      _N;
-  int      _M;
-  double   _nd;
-
-  double   _loglikemax;
-  double   _logevidence;
-
+  vbool    _scale;  
+  vbool    _fixed;
+  vdouble  _guess;
   vdouble  _ns;
   vdouble  _mode;
   vdouble  _mean;
   vdouble  _width;
   vvdouble _cov;
-
+  
+  int      _verbosity;  
   Status   _status;
+  int      _N;
+  int      _M;
+  double   _nd;
+  double   _loglikemax;
+  double   _logevidence;
 
   bool     _findmode();
 
