@@ -18,7 +18,7 @@ $(shell mkdir -p lib)
 
 # get lists of sources
 
-SRCS	:= $(srcdir)/PoissonGammaFit.cc
+SRCS	:= $(srcdir)/PoissonGammaFit.cc $(srcdir)/HistogramCache.cc
 
 CINTSRCS:= $(wildcard $(srcdir)/*_dict.cc)
 

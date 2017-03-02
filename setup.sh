@@ -1,4 +1,4 @@
-PGAMMAFIT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PGAMMAFIT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$PGAMMAFIT_PATH:$PYTHONPATH
 export LD_LIBRARY_PATH=$PGAMMAFIT_PATH/lib:$LD_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=$PGAMMAFIT_PATH/lib:$LD_LIBRARY_PATH
