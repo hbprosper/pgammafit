@@ -185,8 +185,8 @@ def setStyle():
 def main():
 
     # Load PoissonGammaFit class
-    gSystem.Load("libpgammafit")
-
+    gSystem.Load("../lib/libpgammafit")
+    
     # Read expected counts from the counts.txt file and place them in a map
     # This very ugly code is an example of how to do a lot in one line! Not
     # really recommended!

@@ -11,6 +11,6 @@ will not contain MathMore.
 
 * Example
 ```
-cd examples/example1
+cd example
 python pgammafit.py
 ```

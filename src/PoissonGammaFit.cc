@@ -439,11 +439,11 @@ namespace pg {
   static double y [MAXSRC];
 
   double 
-    poissongamma(vdouble&	D,   // Counts  "D_i" for data.
-                 vdouble&	p,   // Weights "p_j" 
-                 vvdouble&	A,   // Counts  "A_ji" for up to 8 sources
-                 vvdouble&	f,   // scale factor for  "A_ji"
-                 vector<bool>& scale)     // Scale p_j if true  
+    poissongamma(vdouble&	D,      // Counts  "D_i" for data.
+                 vdouble&	p,      // Weights "p_j" 
+                 vvdouble&	A,      // Counts  "A_ji" for up to 8 sources
+                 vvdouble&	f,      // scale factor for  "A_ji"
+                 vector<bool>& scale)   // Scale p_j if true  
   {
     int N = p.size(); // Number of sources (N)
     int M = D.size(); // Number of bins    (M)
@@ -496,7 +496,8 @@ namespace pg {
             // Optionally, normalize this source to unit area so that
             // x[i] becomes the actual source count.
             if ( scale[j] )
-              x[j] = p[j] / (ns[j]+M);
+              //x[j] = p[j] / (ns[j]+M);
+	      x[j] = p[j] / ns[j];
             else
               x[j] = p[j];
             s[j] = A[j][i];
