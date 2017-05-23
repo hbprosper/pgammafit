@@ -30,6 +30,7 @@
 //              19-Feb-2011 HBP generalize to handle weighted events
 //              16-Apr-2011 HBP allow some parameters to be fixed
 //              03-Jun-2016 HBP migrate to github
+//              21-May-2017 HBP implement better handling of zero count bins
 //-----------------------------------------------------------------------------
 #include <iostream>
 #include <cmath>
@@ -38,38 +39,20 @@
 #include "TMinuit.h"
 #include "TMatrix.h"
 
-// #ifdef __WITH_CINT__
-//   ClassImp(PoissonGammaFit)
-// #endif
-
 using namespace std;
 //-----------------------------------------------------------------------------
 
 static PoissonGammaFit* fitobject=0;
 namespace
 {
-  void logLike(int&    /** npar */, 
+  void logLike(int&    npar, 
                double* /** grad */, 
                double& fval,
                double* xval,
                int    /**iflag */)
   {
-    vector<bool>& fixed = fitobject->fixed();
-    vector<double>& guess = fitobject->guess();
-    vector<double> p(fixed.size());
-    int j=0;
-    for(unsigned int i=0; i < fixed.size(); ++i)
-      {
-        if ( fixed[i] )
-          {
-            p[i] = guess[i]; // use user supplied value
-          }
-        else
-          {
-            p[i] = xval[j];
-            j++;
-          }
-      }
+    vector<double> p(npar);
+    for(int i=0; i < npar; ++i) p[i] = xval[i];
     fval  = -fitobject->logLikelihood(p);
   }
 
@@ -83,7 +66,7 @@ namespace
 PoissonGammaFit::PoissonGammaFit()
   : _D(vdouble()),
     _A(vvdouble()),
-    _f(vvdouble()),
+    _dA(vvdouble()),
     _a(vvdouble()),
     _scale(vbool()),
     _fixed(vbool()),
@@ -106,7 +89,7 @@ PoissonGammaFit::PoissonGammaFit(vdouble& D,  // Counts  "D_i" for data.
                                  int verbosity)
   : _D(D),
     _A(vvdouble()),
-    _f(vvdouble()),
+    _dA(vvdouble()),
     _a(vvdouble()),
     _scale(vbool()),
     _fixed(vbool()),
@@ -151,29 +134,11 @@ PoissonGammaFit::add(vector<double>& A, vector<double>& dA,
 		     bool scale,
 		     bool isfixed)
 {
-  // Compute scale factors
-  vector<double> f(A.size(), 1); // default scale factor = 1
-  if ( dA.size() == A.size() )
-    {
-      for(unsigned int i=0; i < A.size(); ++i)
-        {
-          if ( dA[i] > 0 )
-            {
-	      // assume:
-	      // f *  A = Aeff
-	      // f * dA = sqrt(Aeff)
-	      // so f = A / (dA*dA)
-	      // where Aeff is the effective count
-              f[i] = A[i] / (dA[i]*dA[i]);
-            }
-        }
-    }
-
   _A.push_back(A);
+  _dA.push_back(dA);
   _a.push_back(A);
   _scale.push_back(scale);
   _fixed.push_back(isfixed);
-  _f.push_back(f);
 }
 
 bool
@@ -239,7 +204,7 @@ double
 PoissonGammaFit::logLikelihood(vdouble& p)
 {
   for(int i=0; i < _N; i++) if (p[i] < 0) return 0;
-  return pg::poissongamma(_D, p, _A, _f, _scale);
+  return pg::poissongamma(_D, p, _A, _dA, _scale);
 }
 
 double 
@@ -247,7 +212,7 @@ PoissonGammaFit::logLikelihood(double* point)
 {
   vdouble p(_N);
   copy(point, point+_N, p.begin());
-  return pg::poissongamma(_D, p, _A, _f, _scale);
+  return pg::poissongamma(_D, p, _A, _dA, _scale);
 }
 
 bool 
@@ -290,29 +255,21 @@ PoissonGammaFit::_findmode()
   if ( _verbosity > 0 )
     cout << "\tFind mode" << endl;
 
- // Count number of free parameters
-  int N = 0;
-  for(int i=0; i < _N; ++i) if ( !_fixed[i] ) N++;
-
   // Find mode of likelihood function
 
-  TMinuit minuit(N);
+  TMinuit minuit(_N);
   minuit.SetFCN(logLike);
 
   int ierflag;
-  int j=0;
   for (int i=0; i < _N; i++)
     {
-      if ( !_fixed[i] )
-        {
-          char name[80]; sprintf(name,"x%d", j);
-          double x    = _guess[i];
-          double step = x / 1000;
-          double minx = 0;
-          double maxx = 10 * x;
-          minuit.mnparm(j, name, x, step, minx, maxx, ierflag);
-          j++;
-        }
+      char name[80]; sprintf(name,"x%d", i);
+      double x    = _guess[i];
+      double step = x / 1000;
+      double minx = 0;
+      double maxx = 10 * x;
+      minuit.mnparm(i, name, x, step, minx, maxx, ierflag);
+      if ( _fixed[i] ) minuit.FixParameter(i);
     }
 
   // Do fit
@@ -330,20 +287,8 @@ PoissonGammaFit::_findmode()
     {
       // Get parameters
       _loglikemax = -fmin;
-      int k=0;
       for (int i=0; i < _N; i++)
-        {
-          if ( _fixed[i] )
-            {
-              _mode[i] = _guess[i];
-              _width[i]= 0;
-            }
-          else
-            {
-              minuit.GetParameter(k, _mode[i], _width[i]);
-              k++;
-            }
-        }
+	minuit.GetParameter(i, _mode[i], _width[i]);
     }
   else
     {
@@ -359,18 +304,18 @@ PoissonGammaFit::_findmode()
   // Compute estimate of log(evidence)
   // log p(D|M,I) ~ ln Lmax + (N/2) ln 2*pi + (1/2) ln det(Sigma)
   
-  int ndim = N * N;
+  int ndim = _N * _N;
   double errmat[2500];
   minuit.mnemat(&errmat[0], ndim);
 
-  TMatrix mat(N, N);
-  for(int ii=0; ii < N; ++ii)
-    for(int jj=0; jj < N; ++jj)
+  TMatrix mat(_N, _N);
+  for(int ii=0; ii < _N; ++ii)
+    for(int jj=0; jj < _N; ++jj)
       { 
         _cov[ii][jj] = errmat[ii*ndim+jj];
-        mat[ii][jj] = _cov[ii][jj];
+        mat[ii][jj]  = _cov[ii][jj];
       }
-  _logevidence = _loglikemax + 0.5*N * log(2*M_PI);
+  _logevidence = _loglikemax + 0.5*_N * log(2*M_PI);
   double det = mat.Determinant();
   if ( det > 0 ) _logevidence += log(det);
 
@@ -390,14 +335,18 @@ PoissonGammaFit::_findmode()
 //
 //              d_i = Sum p_j * a_ji,  i=1..M,   j=1..N
 // 
-//              D_i  is count corresponding to true mean d_i
-//              A_ji is count corresponding to true mean a_ji
-//              f_ji is an optional scale factor associated with A_ji
+//              D_i   is count corresponding to true mean d_i
+//              A_ji  is count corresponding to true mean a_ji
+//              dA_ji is an optional uncertainty associated with A_ji
+//                    which, if specified, implies that an effective
+//                    count and scale factor is to be calculated from
+//                    A and dA.
 //
 //              D is a vector of M observed counts (that is, over M bins)
 //              p is a vector of N parameters (that is, over N sources)
-//              A is a vector of vectors of size N x M counts.
-//
+//              A is a vector of vectors of size N x M counts and likewise
+//              for dA, if given,
+//   
 //              Simple 1-D Application:
 //              
 //              d =  xsec * e_a * a + e_b * b 
@@ -423,6 +372,7 @@ PoissonGammaFit::_findmode()
 //                          scale factors. This is needed for weighted 
 //                          histograms. Reduce maximum number of sources to 6
 //              27-Apr-2011 HBP increase number of sources to 8
+//              21-May-2017 HBP better handling of zero count bins.
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -442,16 +392,16 @@ namespace pg {
     poissongamma(vdouble&	D,      // Counts  "D_i" for data.
                  vdouble&	p,      // Weights "p_j" 
                  vvdouble&	A,      // Counts  "A_ji" for up to 8 sources
-                 vvdouble&	f,      // scale factor for  "A_ji"
+                 vvdouble&     dA,      // Associated uncertainties
                  vector<bool>& scale)   // Scale p_j if true  
   {
     int N = p.size(); // Number of sources (N)
     int M = D.size(); // Number of bins    (M)
-
+    
     // Check inputs
     if ( A.size() != (unsigned int)N )
       {
-        std::cout << "**Error - poissongamma - mis-match in number of sources"
+	std::cout << "**Error - poissongamma - mis-match in number of sources"
                   << endl
                   << "size(p): " << N << " differs from size(A) = " << A.size()
                   << std::endl;
@@ -469,7 +419,7 @@ namespace pg {
 
     if ( M < 1 ) return -1.0;
   
-    if ( ( N < 2 ) || ( N > MAXSRC ) ) return -2.0;
+    if ( ( N < 1 ) || ( N > MAXSRC ) ) return -2.0;
   
     // Get total counts per source
 
@@ -487,32 +437,57 @@ namespace pg {
     for (int i = 0; i < M; ++i)
       {
         int Di = (int)D[i]; // data count for bin i
-
+	
         // compute terms of sum from zero to D
 
         // first do zero...      
         for (int j = 0; j < N; ++j)
           {
-            // Optionally, normalize this source to unit area so that
+            // Optionally, normalize this source to unity so that
             // x[i] becomes the actual source count.
             if ( scale[j] )
-              //x[j] = p[j] / (ns[j]+M);
 	      x[j] = p[j] / ns[j];
             else
               x[j] = p[j];
+	    
             s[j] = A[j][i];
 
-            // Apply user supplied scale factor
-            // This is needed to take account of weighted histograms
-            if ( (int)f[j].size() == M )
+            // If user has supplied dA then 
+	    // compute effective count, Aeff, given A and dA
+            if ( (int)dA[j].size() == M )
               {
-                if ( f[j][i] > 0 )
-                  {
-                    x[j] /= f[j][i];
-                    s[j] *= f[j][i];  
+                if ( dA[j][i] > 0 )
+                  {		    
+		    // assume a density of the form
+		    //  p(a) = (f*a)^Aeff e^(-f*a) / Gamma(Aeff+1)
+		    //
+		    //  A    = gammaPdf(mode)     = beta * Aeff
+		    //  dA   = gammaPdf(std-dev)  = beta * sqrt(Aeff+1)
+		    //
+		    // where, 
+		    //  p(a) = (f*a)^(gamma-1) e^(-f*a) / Gamma(gamma)
+		    //  beta = 1/f
+		    //  Aeff = gamma - 1
+		    //
+		    // define k = (A / dA)**2, then
+		    //  gamma = [(k+2) + sqrt((k+2)**2-4)]/2
+		    //  beta  = dA*[sqrt(k + 4) - sqrt(k)]/2
+		    //        =  A*[sqrt(1 + 4/k) - 1]/2
+		    // compute
+
+		    if (A[j][i] <= 0) A[j][i] = 1.e-4;
+		    
+		    double k = A[j][i] / dA[j][i];
+		    k *= k;
+		    double gamma = (k+2 + sqrt((k+2)*(k+2) - 4)) / 2;
+		    double beta  = A[j][i] * (sqrt(1.0 + 4.0 / k) - 1) / 2;
+                    x[j] *= beta;
+                    s[j]  = gamma-1;
+		    // Note: when gamma >> 1, then
+		    //       Aeff = k, and
+		    //       f    = k / A
                   }
               }
-
             y[j] = x[j] / (1 + x[j]);
             c[j][0] = pow(1 + x[j], -(s[j] + 1));
           }
@@ -526,10 +501,16 @@ namespace pg {
           }
 
         // compute sum
-
+	// warning: the "j" index in the following is not the same as
+	// the j index above; the latter indexes sources, where below "j", "k",
+	// etc. are dummy indices over bins.
         double sum = 0.0;
         switch (N)
           {
+	  case 1:
+	    sum += c[0][Di];
+	    break;
+	    
           case 2:
             for (int j = 0; j < Di+1; ++j)
               sum += 

@@ -205,7 +205,7 @@ class PoissonGammaFit
 
   vdouble  _D;
   vvdouble _A;
-  vvdouble _f;
+  vvdouble _dA;
   vvdouble _a;
   vbool    _scale;  
   vbool    _fixed;
@@ -225,11 +225,6 @@ class PoissonGammaFit
   double   _logevidence;
 
   bool     _findmode();
-
-/* #ifdef __WITH_CINT__ */
-/*  public: */
-/*   ClassDef(PoissonGammaFit, 1) */
-/* #endif */
 };
 
 
