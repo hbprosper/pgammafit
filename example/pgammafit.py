@@ -10,11 +10,11 @@
 #- Created: 20-Sep-2010 Harrison B. Prosper
 #           11-Feb-2011 HBP - remove dependence of kit.h
 #  Updated: 03-Jun-2016 HBP - migrate to github for Sam
+#           01-Jan-2020 HBP - update to Python 3
 #------------------------------------------------------------------------------
 import os, sys, re
+import ROOT
 from time import sleep
-from string import *
-from ROOT import *
 #------------------------------------------------------------------------------
 sources = '''
 QCD
@@ -22,11 +22,11 @@ W
 top
 '''
 # Histogram names
-sources = split(strip(sources))
-hname   = map(lambda x: "h%s" % x, sources)
+sources = str.split(str.strip(sources))
+hname   = ["h%s" % x for x in  sources]
 hnameD  = "hdata"
 getcount= re.compile(r'[a-zA-Z]+ +[0-9.]+')
-vdouble = vector("double")
+vdouble = ROOT.vector("double")
 #------------------------------------------------------------------------------
 # Some Root utilities
 #------------------------------------------------------------------------------
@@ -52,12 +52,12 @@ def setContents(h, c, e):
         h.SetBinError(bin, e[i])
 
 def histogram(hname, xtitle, ytitle, nbins, xmin, xmax):
-    h = TH1F(hname, "", nbins, xmin, xmax)
+    h = ROOT.TH1F(hname, "", nbins, xmin, xmax)
 
     # Set some reasonable defaults
-    h.SetLineColor(kBlue)
+    h.SetLineColor(ROOT.kBlue)
     h.SetMarkerSize(0.8)
-    h.SetMarkerColor(kRed+2)
+    h.SetMarkerColor(ROOT.kRed+2)
     h.SetMarkerStyle(20)
     
     h.GetXaxis().CenterTitle()
@@ -74,12 +74,12 @@ def histogram(hname, xtitle, ytitle, nbins, xmin, xmax):
 
 def setStyle():
     TEXTFONT=42
-    style = TStyle("CMSstyle","CMS Style")
+    style = ROOT.TStyle("SomeStyle", "pgammafit")
     style.SetPalette(1)
 
     #  For the canvas:
     style.SetCanvasBorderMode(0)
-    style.SetCanvasColor(kWhite)
+    style.SetCanvasColor(ROOT.kWhite)
     style.SetCanvasDefH(500) # Height of canvas
     style.SetCanvasDefW(500) # Width of canvas
     style.SetCanvasDefX(0)   # Position on screen
@@ -87,10 +87,10 @@ def setStyle():
 
     #  For the Pad:
     style.SetPadBorderMode(0)
-    style.SetPadColor(kWhite)
-    style.SetPadGridX(kFALSE)
-    style.SetPadGridY(kFALSE)
-    style.SetGridColor(kGreen)
+    style.SetPadColor(ROOT.kWhite)
+    style.SetPadGridX(ROOT.kFALSE)
+    style.SetPadGridY(ROOT.kFALSE)
+    style.SetGridColor(ROOT.kGreen)
     style.SetGridStyle(3)
     style.SetGridWidth(1)
 
@@ -127,7 +127,7 @@ def setStyle():
     #  For the statistics box:
     style.SetOptFile(0)
     style.SetOptStat("")
-    style.SetStatColor(kWhite)
+    style.SetStatColor(ROOT.kWhite)
     style.SetStatFont(TEXTFONT)
     style.SetStatFontSize(0.03)
     style.SetStatTextColor(1)
@@ -165,7 +165,7 @@ def setStyle():
 
     #  For the axis:
     style.SetAxisColor(1, "XYZ")
-    style.SetStripDecimals(kTRUE)
+    style.SetStripDecimals(ROOT.kTRUE)
     style.SetTickLength(0.03, "XYZ")
     style.SetNdivisions(510, "XYZ")
     #  To get tick marks on the opposite side of the frame
@@ -185,19 +185,19 @@ def setStyle():
 def main():
 
     # Load PoissonGammaFit class
-    gSystem.Load("../lib/libpgammafit")
+    ROOT.gSystem.Load("../lib/libpgammafit")
+    from ROOT import PoissonGammaFit
     
     # Read expected counts from the counts.txt file and place them in a map
-    # This very ugly code is an example of how to do a lot in one line! Not
-    # really recommended!
-    counts = map(lambda x: (x[0], atof(x[1])),
-                 map(split, getcount.findall(open("counts.txt").read())))
+    lines = [str.split(z) for z in getcount.findall(open("counts.txt").read())]
+    counts= [(x[0], float(x[1])) for x in lines]
+    
     count = {}
     for key, value in counts: count[key] = value
     
     # Open histogram file
     filename = "histograms.root"
-    tfile = TFile(filename)
+    tfile = ROOT.TFile(filename)
     if not tfile.IsOpen(): sys.exit("** can't find %s" % filename)
 
     # Get histogram of observed counts and..
@@ -207,9 +207,9 @@ def main():
     # Plot it
     # Set some standard style and create a canvas
     setStyle()
-    gStyle.SetCanvasPreferGL(True)
+    ROOT.gStyle.SetCanvasPreferGL(True)
     
-    canvas = TCanvas("fig_fitresults",
+    canvas = ROOT.TCanvas("fig_fitresults",
                      "#font[12]{m_{T}} vs #font[12]{b_{tag}}", 
                      50, 50, 500, 500)        
     canvas.cd()
@@ -290,15 +290,15 @@ def main():
     logevidence = pgfit.logEvidence()
 
     # Print results
-    print
-    print "total observed count: %d" % total    
-    print "%-10s %10s\t%10s    %10s" %  \
-          ('source', "true count", " estimated count", "")
+    print('')
+    print("total observed count: %d" % total)   
+    print("%-10s %10s\t%10s    %10s" %  \
+          ('source', "true count", " estimated count", ""))
     for index, s in enumerate(sources):
-        print "%-10s %10.f\t%10.0f +/-%-10.0f" % \
-              (s, count[s], mode[index], error[index])
+        print("%-10s %10.f\t%10.0f +/-%-10.0f" % \
+              (s, count[s], mode[index], error[index]))
 #------------------------------------------------------------------------------
 try:
     main()
 except KeyboardInterrupt:
-    print "\n\t\tciao!\n"
+    print("\n\t\tciao!\n")
